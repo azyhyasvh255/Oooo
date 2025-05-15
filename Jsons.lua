@@ -1,82 +1,138 @@
--- Auto Farm Script with GUI, Speed, Hover, and Level-Based Farming
-
--- Create GUI
+-- GUI Setup
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AutoFarmUI"
-ScreenGui.Parent = game.CoreGui
+local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local UIListLayout = Instance.new("UIListLayout")
 
--- Toggle Button
-local Toggle = Instance.new("TextButton")
-Toggle.Size = UDim2.new(0, 140, 0, 40)
-Toggle.Position = UDim2.new(0, 10, 0.5, -20)
-Toggle.BackgroundColor3 = Color3.fromRGB(85, 170, 255)
-Toggle.Text = "Auto Farm: OFF"
-Toggle.TextScaled = true
-Toggle.Parent = ScreenGui
+-- Main Power Toggle Button
+local MainToggle = Instance.new("TextButton")
 
--- Toggle Handler
-local autoFarmEnabled = false
-Toggle.MouseButton1Click:Connect(function()
-    autoFarmEnabled = not autoFarmEnabled
-    Toggle.Text = autoFarmEnabled and "Auto Farm: ON" or "Auto Farm: OFF"
-    Toggle.BackgroundColor3 = autoFarmEnabled and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(85, 170, 255)
-end)
-
--- Level-Based Position Table (example coordinates)
-local levelPositions = {
-    [1] = Vector3.new(100, 20, 100),
-    [10] = Vector3.new(500, 20, -200),
-    [20] = Vector3.new(1000, 30, 400),
-    [30] = Vector3.new(1500, 40, -100),
-    [40] = Vector3.new(2000, 50, 300)
-    -- Add more level thresholds as needed
+-- Configuration table
+getgenv().BloxFruits = {
+    Team = "Marines",
+    TweenSpeed = 350,
+    Fruit = {
+        FruitNotifier = false,
+        AutoRandom = true,
+        FruitSniper = {
+            Enabled = false,
+            TargetFruits = {"Yeti-Yeti", "Dragon-Dragon", "Dough-Dough"},
+        },
+    },
+    Farm = {
+        Enabled = true,
+        FastMethod = false,
+        AutoHop = true,
+        ItemHop = true,
+    },
+    Webhook = {
+        Enabled = false,
+        URL = "Your Webhook Url",
+        UserId = "Id Discord",
+    },
+    BlackScreen = false,
+    FpsBoost = false,
+    AntiIdle = true,
 }
 
--- Find best position for given level
-local function getFarmingPosition(level)
-    local lastPos = nil
-    for lvl, pos in pairs(levelPositions) do
-        if level >= lvl then
-            lastPos = pos
-        end
-    end
-    return lastPos
+-- GUI Design
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+MainFrame.Size = UDim2.new(0, 250, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.Parent = ScreenGui
+MainFrame.BorderSizePixel = 0
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+UIListLayout.Parent = MainFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 6)
+
+-- Helper function to create toggle buttons
+local function createToggle(text, getPath)
+    local toggle = Instance.new("TextButton")
+    toggle.Text = text .. ": OFF"
+    toggle.Size = UDim2.new(1, -20, 0, 30)
+    toggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    toggle.TextColor3 = Color3.fromRGB(0, 0, 0)
+    toggle.Font = Enum.Font.SourceSansBold
+    toggle.TextSize = 18
+    toggle.Parent = MainFrame
+
+    local valuePath = getPath()
+
+    toggle.MouseButton1Click:Connect(function()
+        local currentValue = valuePath.value
+        valuePath.set(not currentValue)
+        toggle.Text = text .. ": " .. (valuePath.value and "ON" or "OFF")
+    end)
 end
 
--- Main Auto Farm Loop
-task.spawn(function()
-    while true do
-        task.wait(1)
-        if autoFarmEnabled then
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local char = player.Character
-                local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                local leaderstats = player:FindFirstChild("leaderstats")
-                local levelValue = leaderstats and leaderstats:FindFirstChild("Level")
+-- Define all toggles
+createToggle("Fruit Notifier", function()
+    return {
+        value = getgenv().BloxFruits.Fruit.FruitNotifier,
+        set = function(v) getgenv().BloxFruits.Fruit.FruitNotifier = v end
+    }
+end)
 
-                if humanoid and hrp and levelValue then
-                    -- Speed + Hover
-                    humanoid.WalkSpeed = 160
-                    humanoid.JumpPower = 100
-                    hrp.Velocity = Vector3.new(0, 35, 0)
+createToggle("Auto Random Fruit", function()
+    return {
+        value = getgenv().BloxFruits.Fruit.AutoRandom,
+        set = function(v) getgenv().BloxFruits.Fruit.AutoRandom = v end
+    }
+end)
 
-                    -- Get Position for current level
-                    local targetPos = getFarmingPosition(levelValue.Value)
-                    if targetPos then
-                        hrp.CFrame = CFrame.new(targetPos)
-                    end
-                end
-            end)
-        else
-            pcall(function()
-                local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid.WalkSpeed = 16
-                    humanoid.JumpPower = 50
-                end
-            end)
-        end
-    end
+createToggle("Fruit Sniper", function()
+    return {
+        value = getgenv().BloxFruits.Fruit.FruitSniper.Enabled,
+        set = function(v) getgenv().BloxFruits.Fruit.FruitSniper.Enabled = v end
+    }
+end)
+
+createToggle("Auto Farm", function()
+    return {
+        value = getgenv().BloxFruits.Farm.Enabled,
+        set = function(v) getgenv().BloxFruits.Farm.Enabled = v end
+    }
+end)
+
+createToggle("Auto Hop", function()
+    return {
+        value = getgenv().BloxFruits.Farm.AutoHop,
+        set = function(v) getgenv().BloxFruits.Farm.AutoHop = v end
+    }
+end)
+
+createToggle("Item Hop", function()
+    return {
+        value = getgenv().BloxFruits.Farm.ItemHop,
+        set = function(v) getgenv().BloxFruits.Farm.ItemHop = v end
+    }
+end)
+
+createToggle("Anti Idle", function()
+    return {
+        value = getgenv().BloxFruits.AntiIdle,
+        set = function(v) getgenv().BloxFruits.AntiIdle = v end
+    }
+end)
+
+-- Main GUI ON/OFF Toggle
+MainToggle.Text = "JIO: ON"
+MainToggle.Size = UDim2.new(1, -20, 0, 40)
+MainToggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainToggle.TextColor3 = Color3.fromRGB(0, 0, 0)
+MainToggle.Font = Enum.Font.SourceSansBold
+MainToggle.TextSize = 20
+MainToggle.Parent = ScreenGui
+MainToggle.Position = UDim2.new(0.5, -125, 0.5, 170)
+
+local guiEnabled = true
+MainToggle.MouseButton1Click:Connect(function()
+    guiEnabled = not guiEnabled
+    MainFrame.Visible = guiEnabled
+    MainToggle.Text = "JIO: " .. (guiEnabled and "ON" or "OFF")
 end)
