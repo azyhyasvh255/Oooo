@@ -1,73 +1,52 @@
-local player = game.Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- Auto Clicker for Blox Fruits with Corner Toggle Button
 
-local isAutoEnabled = false -- Toggle status
+local UIS = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+local mouse = plr:GetMouse()
 
--- Toggle function to switch ON/OFF
-local function toggleAuto()
-    isAutoEnabled = not isAutoEnabled
-    print("Auto Script is now", isAutoEnabled and "Enabled" or "Disabled")
-end
+local clickEnabled = false
+local clickSpeed = 0.2 -- Delay between clicks in seconds
 
--- Function to check for Dragon Fruit in inventory
-local function hasDragonFruit()
-    for _, item in pairs(player.Backpack:GetChildren()) do
-        if item.Name == "Dragon Fruit" then
-            return true
-        end
-    end
-    for _, item in pairs(player.Character:GetChildren()) do
-        if item.Name == "Dragon Fruit" then
-            return true
-        end
-    end
-    return false
-end
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui")
+local ToggleButton = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
 
--- Simulate Equip (just print for now)
-local function equipItem(name)
-    print("Equipping:", name)
-    -- Add your real equip code here
-end
+ScreenGui.Name = "AutoClickerUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = plr:WaitForChild("PlayerGui")
 
--- Auto collect function (simplified)
-local function autoCollect()
-    for _, obj in pairs(workspace:GetChildren()) do
-        if obj.Name == "Dragon Fruit" or obj.Name == "Sword" or obj.Name == "Fruit" then
-            print("Collecting item:", obj.Name)
-            -- Add pickup logic here
-        end
-    end
-end
+ToggleButton.Name = "ToggleClicker"
+ToggleButton.Parent = ScreenGui
+ToggleButton.Size = UDim2.new(0, 100, 0, 40)
+ToggleButton.Position = UDim2.new(1, -110, 1, -50) -- bottom right corner
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+ToggleButton.Text = "Clicker: OFF"
+ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 18
 
--- Boss fight logic simplified
-local function bossFightLogic()
-    local bossFightActive = false -- Simulate boss fight status; real logic needed to detect
-    if bossFightActive then
-        if hasDragonFruit() then
-            equipItem("Dragon Fruit")
-        else
-            equipItem("Sword")
-        end
-    else
-        equipItem("Sword")
-    end
-end
+UICorner.CornerRadius = UDim.new(1, 0)
+UICorner.Parent = ToggleButton
 
--- Bind toggle to keyboard key (For example, press "P" to toggle ON/OFF)
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed then
-        if input.KeyCode == Enum.KeyCode.P then
-            toggleAuto()
-        end
-    end
+-- Toggle function
+ToggleButton.MouseButton1Click:Connect(function()
+	clickEnabled = not clickEnabled
+	ToggleButton.Text = "Clicker: " .. (clickEnabled and "ON" or "OFF")
+	ToggleButton.BackgroundColor3 = clickEnabled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
 end)
 
--- Main loop running every second, only if enabled
-RunService.Heartbeat:Connect(function()
-    if isAutoEnabled then
-        autoCollect()
-        bossFightLogic()
-    end
+-- Auto click loop
+task.spawn(function()
+	while true do
+		if clickEnabled then
+			mouse1press()
+			wait(0.05)
+			mouse1release()
+			wait(clickSpeed)
+		else
+			wait(0.2)
+		end
+	end
 end)
