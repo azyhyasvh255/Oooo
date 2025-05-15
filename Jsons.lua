@@ -1,23 +1,43 @@
--- Starter: Create a ScreenGui
+-- Basic Auto Farm Level Script with GUI Toggle Button (No Loading UI)
+
+-- Create GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "LoadingUI"
+ScreenGui.Name = "AutoFarmUI"
 ScreenGui.Parent = game.CoreGui
 
--- Create a Frame (background panel)
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 300, 0, 100)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -50)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.BorderSizePixel = 0
-Frame.Parent = ScreenGui
+-- Toggle Button
+local Toggle = Instance.new("TextButton")
+Toggle.Size = UDim2.new(0, 120, 0, 40)
+Toggle.Position = UDim2.new(0, 10, 0.5, -20)
+Toggle.BackgroundColor3 = Color3.fromRGB(85, 170, 255) -- Tum yeh color customize kar sakte ho
+Toggle.Text = "Auto Farm: OFF"
+Toggle.TextScaled = true
+Toggle.Parent = ScreenGui
 
--- Create a TextLabel (Loading Text)
-local TextLabel = Instance.new("TextLabel")
-TextLabel.Size = UDim2.new(1, 0, 1, 0)
-TextLabel.BackgroundTransparency = 1
-TextLabel.Text = "Loading..."
-TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel.TextScaled = true
-TextLabel.Parent = Frame
+-- Farming Control
+local autoFarmEnabled = false
 
--- Optional: Add progress bar, animation, etc.
+Toggle.MouseButton1Click:Connect(function()
+    autoFarmEnabled = not autoFarmEnabled
+    Toggle.Text = autoFarmEnabled and "Auto Farm: ON" or "Auto Farm: OFF"
+    Toggle.BackgroundColor3 = autoFarmEnabled and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(85, 170, 255)
+end)
+
+-- Auto Farm Loop
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if autoFarmEnabled then
+            -- Yahan tum apna farming logic daal sakte ho
+            -- Example: Auto attack enemy, move to quest, etc.
+            -- Example:
+            pcall(function()
+                local character = game.Players.LocalPlayer.Character
+                if character then
+                    -- Dummy example: teleport to position
+                    character:MoveTo(Vector3.new(0, 10, 0))
+                end
+            end)
+        end
+    end
+end)
