@@ -1,56 +1,44 @@
--- Simple big toggle button in the right corner to show/hide the main UI
+getgenv().simple_settings = {
+    ["MASTERY"] = { -- Settings related to leveling up weapon or skill mastery
+        ["ACTIVE"] = true, -- Enable or disable mastery leveling (true = enabled, false = disabled)
+        ["METHOD"] = "Half", -- Method for gaining mastery, "Half"[350] or "Full"[600]
+    },
 
-local player = game.Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
+    ["OBJECTIVE"] = { -- Goals for farming and unlocking features
+        ["GODHUMAN"] = true, -- Automatically unlock the "Godhuman" fighting style
+        ["RACE-CONFIGURE"] = {
+            ["RACE"] = {"Human", "Skypiea", "Fishman", "Mink"}, -- List -- "Human", "Skypiea", "Fishman", "Mink"
+            ["RACE-LOCK"] = true, -- Automatically change the character race if not in the list
+            ["RACE-V3"] = true, -- Automatically upgrade character race to V3 if possible Human, Mink, (Fishman, Ghoul, Cyborg) soon
+        },
+        ["FRAGMENT"] = 30000, -- Limit number of fragments to collect
 
--- Main UI Frame (jo pehle banaya tha)
-local mainUI = Instance.new("Frame")
-mainUI.Size = UDim2.new(0, 200, 0, 150)
-mainUI.Position = UDim2.new(1, -210, 0, 10) -- Right top corner, 10 px down, 10 px from right edge
-mainUI.BackgroundColor3 = Color3.fromRGB(30,30,30)
-mainUI.Parent = PlayerGui
+        -- SWORD
+        ["CANVANDER"] = true,
+        ["BUDDY-SWORD"] = true,
+        ["CURSED-DUAL-KATANA"] = true,
+        ["SHARK-ANCHOR"] = true,
 
--- Add your existing buttons inside mainUI here...
+        --GUN
+        ["ACIDUM-RIFLE"] = true,
+        ["VENOM-BOW"] = true,
+        ["SOUL-GUITAR"] = true,
 
--- Toggle Button
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 80, 0, 80) -- bada button
-toggleButton.Position = UDim2.new(1, -90, 0.5, -40) -- Screen ke right center ke thoda upar
-toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.Text = "UI ON"
-toggleButton.Font = Enum.Font.SourceSansBold
-toggleButton.TextSize = 24
-toggleButton.Parent = PlayerGui
+        -- AURA
+        ["COLOR-HAKI"] = {"Pure Red","Winter Sky","Snow White"}, -- Aura color to craft
+    },
 
-local uiVisible = true
+    ["FRUITPURCHASE"] = true, -- Automatically purchase fruits based on priority list
+    ["PRIORITYFRUIT"] = { -- List of preferred fruits to purchase or eat in order of priority
+        [1] = "Dragon-Dragon",
+        [2] = "Dough-Dough",
+        [3] = "Flame-Flame",
+        [4] = "Rumble-Rumble",
+        [5] = "Human-Human: Buddha",
+        [6] = "Dark-Dark",
+    },
 
-toggleButton.MouseButton1Click:Connect(function()
-    uiVisible = not uiVisible
-    mainUI.Visible = uiVisible
-    toggleButton.Text = uiVisible and "UI ON" or "UI OFF"
-end)
-
--- Example inside mainUI: Add farmButton and levelUpButton
-local farmButton = Instance.new("TextButton", mainUI)
-farmButton.Position = UDim2.new(0, 10, 0, 10)
-farmButton.Size = UDim2.new(0, 180, 0, 40)
-farmButton.Text = "Auto Farm: OFF"
-
-local levelUpButton = Instance.new("TextButton", mainUI)
-levelUpButton.Position = UDim2.new(0, 10, 0, 60)
-levelUpButton.Size = UDim2.new(0, 180, 0, 40)
-levelUpButton.Text = "Auto Level-Up: OFF"
-
-local autoFarmEnabled = false
-local autoLevelUpEnabled = false
-
-farmButton.MouseButton1Click:Connect(function()
-    autoFarmEnabled = not autoFarmEnabled
-    farmButton.Text = "Auto Farm: " .. (autoFarmEnabled and "ON" or "OFF")
-end)
-
-levelUpButton.MouseButton1Click:Connect(function()
-    autoLevelUpEnabled = not autoLevelUpEnabled
-    levelUpButton.Text = "Auto Level-Up: " .. (autoLevelUpEnabled and "ON" or "OFF")
-end)
+    ["FPSCAP"] = 30, -- Limit the frame rate to optimize performance
+    ["LOWTEXTURE"] = true-- Reduce graphic quality for better performance
+}
+loadstring(game:HttpGet("https://raw.githubusercontent.com/simple-hubs/contents/refs/heads/main/bloxfruit-kaitan-main.lua"))()
