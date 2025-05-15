@@ -4,6 +4,7 @@ local plr = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 local ts = game:GetService("TweenService")
 
+-- Teleport function
 function teleport(pos)
     local hrp = plr.Character:WaitForChild("HumanoidRootPart")
     local tween = ts:Create(hrp, TweenInfo.new(1), {CFrame = CFrame.new(pos)})
@@ -11,8 +12,9 @@ function teleport(pos)
     tween.Completed:Wait()
 end
 
+-- Bandit finder
 function getBandit()
-    for i,v in pairs(game.Workspace.Enemies:GetChildren()) do
+    for i, v in pairs(game.Workspace.Enemies:GetChildren()) do
         if v.Name == "Bandit" and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
             return v
         end
@@ -20,23 +22,32 @@ function getBandit()
     return nil
 end
 
+-- Attack function (simple tool swing)
+function attack()
+    local tool = plr.Character:FindFirstChildOfClass("Tool")
+    if tool then
+        tool:Activate()
+    end
+end
+
 while true do
     pcall(function()
-        -- Accept Quest
-        teleport(Vector3.new(1060, 16, 1547))  -- Bandit Quest Giver position
-        wait(1.5)
-        rs.Remotes.Comm:InvokeServer("StartQuest", "BanditQuest1", 1)
-        wait(1)
+        -- Quest Status Check
+        if not plr.PlayerGui:FindFirstChild("QuestGUI") then
+            teleport(Vector3.new(1060, 16, 1547))  -- NPC location
+            wait(1)
+            rs.Remotes.Comm:InvokeServer("StartQuest", "BanditQuest1", 1)
+            wait(1)
+        end
 
-        -- Find and kill bandits
-        local bandit = getBandit()
-        while bandit do
-            teleport(bandit.HumanoidRootPart.Position + Vector3.new(0,5,0))
-            wait(0.2)
-            rs.Remotes.Comm:InvokeServer("Attack", "Melee")  -- Replace with real attack function if needed
-            wait(0.3)
-            bandit = getBandit()
+        -- Attack Loop
+        local target = getBandit()
+        while target and target.Humanoid.Health > 0 do
+            teleport(target.HumanoidRootPart.Position + Vector3.new(0, 3, 0))
+            attack()
+            wait(0.5)
+            target = getBandit()
         end
     end)
-    wait(2)
+    wait(1)
 end
