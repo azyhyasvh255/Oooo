@@ -1,46 +1,42 @@
--- Auto Farm + Level Detect
-local Player = game.Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
+repeat wait() until game:IsLoaded()
 
-function getQuest()
-    local level = Player.Data.Level.Value
-    if level < 10 then
-        return "BanditQuest1", Vector3.new(1060, 16, 1547), "Bandit"
-    elseif level < 30 then
-        return "JungleQuest", Vector3.new(-1600, 36, 145), "Monkey"
-    elseif level < 60 then
-        return "BuggyQuest1", Vector3.new(-1144, 14, 3832), "Pirate"
-    else
-        return nil
-    end
-end
+local plr = game.Players.LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
+local ts = game:GetService("TweenService")
 
 function teleport(pos)
-    local tween = TweenService:Create(Player.Character.HumanoidRootPart, TweenInfo.new(1), {CFrame = CFrame.new(pos)})
+    local hrp = plr.Character:WaitForChild("HumanoidRootPart")
+    local tween = ts:Create(hrp, TweenInfo.new(1), {CFrame = CFrame.new(pos)})
     tween:Play()
     tween.Completed:Wait()
 end
 
-while wait(1) do
-    pcall(function()
-        local questName, questPos, enemyName = getQuest()
-        if questName then
-            -- Accept Quest
-            Player.Character.HumanoidRootPart.CFrame = CFrame.new(questPos)
-            wait(2)
-            ReplicatedStorage.Remotes.Comm:InvokeServer("StartQuest", questName, 1)
+function getBandit()
+    for i,v in pairs(game.Workspace.Enemies:GetChildren()) do
+        if v.Name == "Bandit" and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+            return v
+        end
+    end
+    return nil
+end
 
-            -- Attack Loop
-            for _,v in pairs(workspace.Enemies:GetChildren()) do
-                if v.Name == enemyName and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-                    teleport(v.HumanoidRootPart.Position + Vector3.new(0, 5, 0))
-                    while v.Humanoid.Health > 0 do
-                        ReplicatedStorage.Remotes.Comm:InvokeServer("Attack", "Melee") -- Replace with proper attack method
-                        wait(0.5)
-                    end
-                end
-            end
+while true do
+    pcall(function()
+        -- Accept Quest
+        teleport(Vector3.new(1060, 16, 1547))  -- Bandit Quest Giver position
+        wait(1.5)
+        rs.Remotes.Comm:InvokeServer("StartQuest", "BanditQuest1", 1)
+        wait(1)
+
+        -- Find and kill bandits
+        local bandit = getBandit()
+        while bandit do
+            teleport(bandit.HumanoidRootPart.Position + Vector3.new(0,5,0))
+            wait(0.2)
+            rs.Remotes.Comm:InvokeServer("Attack", "Melee")  -- Replace with real attack function if needed
+            wait(0.3)
+            bandit = getBandit()
         end
     end)
+    wait(2)
 end
